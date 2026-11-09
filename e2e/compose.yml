@@ -1,0 +1,165 @@
+# The end-to-end suite's deployment (run.sh starts it): QAuth's server image
+# with this plugin added (Dockerfile), its migration runner, PostgreSQL,
+# Redis, and a mock Google.
+#
+# The mock answers at Google's own host names, the hosts of the preset's
+# origins, as network aliases: the server's egress client resolves names
+# through DNS. It sits on a network of its own, `internet`, whose addresses
+# are public ones. A preset's calls go as `remote_document` destinations
+# unless its config names their origin, and this plugin's config names none,
+# so the operator's egress allowlist opens no private address for them (by
+# QAuth's design); Google itself is on public addresses. The range is one no
+# service of the run uses; it exists only on this network, and on the host's
+# route to it while the deployment runs. The allowlist (egress-allowlist.json)
+# names Google's hosts all the same, to show that it is not what lets the
+# calls through.
+#
+# QAUTH_IMAGE and QAUTH_MIGRATION_IMAGE are QAuth's images; run.sh sets them.
+# The secrets (JWT keys, KEK, session cookie secret, the mock's client secret)
+# come from run.sh's environment, made fresh for each run.
+name: plugin-google-e2e
+
+networks:
+  default: {}
+  internet:
+    ipam:
+      config:
+        - subnet: 11.10.0.0/24
+
+x-server: &server
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      QAUTH_IMAGE: ${QAUTH_IMAGE:?run e2e/run.sh}
+  image: plugin-google-e2e/auth-server:local
+  environment: &server-env
+    NODE_ENV: production
+    HOST: 0.0.0.0
+    PORT: '3000'
+    LOG_LEVEL: info
+    DATABASE_URL: postgres://qauth:qauth@postgres:5432/qauth
+    REDIS_URL: redis://redis:6379/0
+    REDIS_HOST: redis
+    REDIS_PORT: '6379'
+    REDIS_DB: '0'
+    JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:?run e2e/run.sh}
+    JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?run e2e/run.sh}
+    JWT_ISSUER: http://localhost:3000
+    KEK: ${KEK:?run e2e/run.sh}
+    SESSION_COOKIE_SECRET: ${SESSION_COOKIE_SECRET:?run e2e/run.sh}
+    # The suite talks to the server over plain http on localhost.
+    SESSION_COOKIE_SECURE: 'false'
+    # Required at boot; the suite sends no mail (the mock email provider).
+    EMAIL_FROM_ADDRESS: noreply@qauth.test
+    EMAIL_BASE_URL: http://localhost:3000
+    # The first boot seeds the master realm with sign-up allowed, so a first
+    # sign-in through Google creates the account.
+    ALLOW_SIGN_UP: 'true'
+    # The suite signs in a dozen times from one address.
+    RATE_LIMIT_MAX: '10000'
+    LOGIN_RATE_LIMIT: '1000'
+    AUTHORIZE_RATE_LIMIT: '1000'
+    TOKEN_RATE_LIMIT: '1000'
+    REGISTER_CLIENT_RATE_LIMIT: '100'
+    # The plugin, as an operator installs it.
+    AUTH_METHOD_PLUGINS: '@qauth-labs/plugin-google'
+    PLUGIN_API_ENABLED: 'true'
+    EGRESS_ALLOWLIST_PATH: /etc/qauth/egress-allowlist.json
+    # The mock's certificate is signed by run.sh's throwaway CA.
+    NODE_EXTRA_CA_CERTS: /etc/qauth/e2e-ca.crt
+    # The admin API configures the plugin for the realm. Its base URL is only
+    # what DPoP proofs name (htu); the suite reaches it on port 3002.
+    ADMIN_API_ENABLED: 'true'
+    ADMIN_API_HOST: 0.0.0.0
+    ADMIN_API_PORT: '3002'
+    ADMIN_API_BASE_URL: https://admin.qauth.test
+    DPOP_ENABLED: 'true'
+  volumes:
+    - ./egress-allowlist.json:/etc/qauth/egress-allowlist.json:ro
+    - ./.work/certs/ca.crt:/etc/qauth/e2e-ca.crt:ro
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: qauth
+      POSTGRES_USER: qauth
+      POSTGRES_PASSWORD: qauth
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U qauth -d qauth']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    image: ${QAUTH_MIGRATION_IMAGE:?run e2e/run.sh}
+    environment:
+      DATABASE_URL: postgres://qauth:qauth@postgres:5432/qauth
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  mock-google:
+    image: node:26-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94
+    command: ['node', '/mock/server.mjs']
+    environment:
+      MOCK_GOOGLE_CLIENT_ID: ${MOCK_GOOGLE_CLIENT_ID:?run e2e/run.sh}
+      MOCK_GOOGLE_CLIENT_SECRET: ${MOCK_GOOGLE_CLIENT_SECRET:?run e2e/run.sh}
+      # The redirect URI registered for the client: the plugin's callback on
+      # the realm's origin.
+      MOCK_GOOGLE_REDIRECT_URI: http://localhost:3000/upstream/google/callback
+    volumes:
+      - ./mock-google:/mock:ro
+      - ./.work/certs:/certs:ro
+    networks:
+      internet:
+        aliases:
+          - accounts.google.com
+          - oauth2.googleapis.com
+          - www.googleapis.com
+          - openidconnect.googleapis.com
+    # The suite plays the browser at the mock's authorization page, and reads
+    # its control API, from the host.
+    ports:
+      - 127.0.0.1:8443:443
+
+  auth-server:
+    <<: *server
+    networks: [default, internet]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      mock-google:
+        condition: service_started
+    ports:
+      - 127.0.0.1:3000:3000
+      - 127.0.0.1:3002:3002
+
+  # The same image and plugin with the experimental plugin API off: the boot
+  # must skip the plugin and say why. run.sh starts it after the first server
+  # has seeded the database.
+  auth-server-plugin-api-off:
+    <<: *server
+    environment:
+      <<: *server-env
+      PLUGIN_API_ENABLED: 'false'
+      ADMIN_API_ENABLED: 'false'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    ports:
+      - 127.0.0.1:3010:3000
+    profiles: [plugin-api-off]
