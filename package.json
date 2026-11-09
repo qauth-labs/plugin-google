@@ -1,0 +1,68 @@
+{
+  "name": "@qauth-labs/plugin-google",
+  "version": "0.1.0-rc.0",
+  "description": "Google sign-in for QAuth, as an upstream OpenID Connect preset: Google's issuer, origins, scopes and claim rules, run by QAuth's own OpenID Connect client. Experimental.",
+  "keywords": [
+    "qauth",
+    "qauth-plugin",
+    "auth-method",
+    "google",
+    "openid-connect",
+    "oidc",
+    "sign-in"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/qauth-labs/plugin-google#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qauth-labs/plugin-google.git"
+  },
+  "bugs": {
+    "url": "https://github.com/qauth-labs/plugin-google/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=26.10.0"
+  },
+  "packageManager": "pnpm@12.14.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "test": "vitest run",
+    "e2e": "bash e2e/run.sh",
+    "prepack": "pnpm run build"
+  },
+  "dependencies": {
+    "@qauth-labs/plugin-sdk": "file:vendor/qauth-labs-plugin-sdk-0.2.2.tgz"
+  },
+  "peerDependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "oxfmt": "0.73.0",
+    "oxlint": "1.88.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5",
+    "zod": "^4.6.7"
+  }
+}

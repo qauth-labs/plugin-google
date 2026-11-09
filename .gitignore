@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+*.tgz
+# The plugin SDK, vendored until its release with the preset shape is on npm (vendor/README.md).
+!vendor/*.tgz
+# The end-to-end suite's generated certificates, allowlist and logs.
+e2e/.work/
+# The qauth checkout e2e/qauth-images.sh builds the server images from.
+e2e/.work-qauth/

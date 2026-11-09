@@ -1,0 +1,2 @@
+`qauth-labs-plugin-sdk-0.2.2.tgz` is `@qauth-labs/plugin-sdk` with the upstream OpenID Connect preset shape, as qauth-labs/qauth's `release-npm` workflow packed it (a dry run) on qauth-labs/qauth#1069 at `f6289fc218da0c6e84a86dd41ddf385c4a08894d`; its sha256 is `7e43a58b431141b278c569b4a88536ca69cdc1f7be19aac34055985db813797f`.
+It is temporary: the plugin moves to the npm release of the SDK that carries qauth-labs/qauth#671 once that is published, and this directory goes away.
