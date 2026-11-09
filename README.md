@@ -184,10 +184,11 @@ first-party plugin, and the experimental plugin API is off. …`
 Through QAuth's admin API, per realm (`{realm}` is the realm's id, `google`
 the plugin's name):
 
-1. Seal the client secret:
-   `POST /admin/v1-rc.0/realms/{realm}/plugins/google/secrets/seal` with
-   `{"path": "clientSecret", "value": "<client secret>"}`. The answer's
-   `sealed` value is what the server stores; the secret itself never is.
+1. Seal the client secret for the configure that will carry it:
+   `POST /admin/v1-rc.0/realms/{realm}/secrets/seal` with
+   `{"operation": "plugins.update", "member": "/secrets/clientSecret", "params": {"plugin": "google"}, "value": "<client secret>"}`.
+   The answer's `sealed` value opens only in that request; no request,
+   approval or log holds the secret itself.
 2. Set the configuration:
    `POST /admin/v1-rc.0/realms/{realm}/plugins/google/config` with
    `{"version": <current version>, "config": {"clientId": "<client id>"}, "secrets": {"clientSecret": {"sealed": "<sealed>"}}}`.

@@ -69,8 +69,11 @@ async function configure(): Promise<void> {
   const { clientId: googleClientId, clientSecret } = mockClient();
   const current = await admin.call('GET', '/plugins/google');
   expect(current.status).toBe(200);
-  const sealed = await admin.call('POST', '/plugins/google/secrets/seal', {
-    path: 'clientSecret',
+  // The secret reaches the server once, sealed for the configure that carries it.
+  const sealed = await admin.call('POST', '/secrets/seal', {
+    operation: 'plugins.update',
+    member: '/secrets/clientSecret',
+    params: { plugin: 'google' },
     value: clientSecret,
   });
   expect(sealed.status, JSON.stringify(sealed.body)).toBe(200);
