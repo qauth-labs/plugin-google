@@ -11,8 +11,7 @@
 # QAuth's design); Google itself is on public addresses. The range is one no
 # service of the run uses; it exists only on this network, and on the host's
 # route to it while the deployment runs. The allowlist (egress-allowlist.json)
-# names Google's hosts all the same, to show that it is not what lets the
-# calls through.
+# names Google's hosts all the same; it is not what lets the calls through.
 #
 # QAUTH_IMAGE and QAUTH_MIGRATION_IMAGE are QAuth's images; run.sh sets them.
 # The secrets (JWT keys, KEK, session cookie secret, the mock's client secret)
