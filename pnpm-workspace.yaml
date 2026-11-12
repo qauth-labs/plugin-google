@@ -1,0 +1,18 @@
+# pnpm settings for this repository, which is one package (no workspace
+# packages). The same rules as QAuth's own pnpm-workspace.yaml.
+
+# Supply-chain cooldown: a version is resolved only once it has been on the
+# registry for 7 days (10080 minutes), long enough for a hijacked release to be
+# reported and pulled. A version may be taken sooner only when it is listed
+# below by exact version, with why and when it matures; remove each once it
+# matures.
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  # QAuth's plugin SDK, provenance-signed by qauth-labs/qauth's release-npm
+  # workflow at tag v0.2.3: the first release with the upstream OpenID Connect
+  # preset shape this plugin is written against.
+  # Published 2026-11-12T05:53:39Z: remove after 2026-11-19T05:54Z.
+  - '@qauth-labs/plugin-sdk@0.2.3'
+
+# Never auto-install before a script runs; warn when node_modules is stale.
+verifyDepsBeforeRun: warn

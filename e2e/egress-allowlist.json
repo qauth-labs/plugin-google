@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "host": "accounts.google.com",
+      "realms": ["master"],
+      "note": "Google's issuer and authorization endpoint. Like the three below, it opens nothing for this plugin: a preset's calls go as remote_document, which no allowlist entry opens, so the mock answers on a public address (compose.yml)."
+    },
+    {
+      "host": "oauth2.googleapis.com",
+      "realms": ["master"],
+      "note": "Google's token endpoint."
+    },
+    {
+      "host": "www.googleapis.com",
+      "realms": ["master"],
+      "note": "Google's key set."
+    },
+    {
+      "host": "openidconnect.googleapis.com",
+      "realms": ["master"],
+      "note": "Google's userinfo endpoint."
+    }
+  ]
+}
