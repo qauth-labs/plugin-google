@@ -4,9 +4,7 @@ import { defineConfig } from 'vitest/config';
 // through that script, not on its own.
 export default defineConfig({
   test: {
-    // The suite's own file only, never one of the qauth checkout in
-    // e2e/.work-qauth/.
-    include: ['e2e/*.e2e.test.ts'],
+    include: ['e2e/**/*.e2e.test.ts'],
     environment: 'node',
     // One deployment, one realm: the tests run in order, in one file.
     fileParallelism: false,

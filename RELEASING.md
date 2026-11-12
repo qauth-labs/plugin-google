@@ -20,37 +20,18 @@ The package has its own version line, not QAuth's.
   AuthMethod contract each version is for. Update it in the same pull request
   as the version.
 
-## Before the first release
-
-Two temporary pieces must go first, in a pull request whose CI is green:
-
-1. **The plugin SDK from npm.** The plugin depends on the SDK tarball in
-   `vendor/`, until the SDK release that carries the upstream OpenID Connect
-   preset shape (qauth-labs/qauth#671) is on npm. Depend on that release
-   instead (`@qauth-labs/plugin-sdk` at its exact version, listed under
-   `minimumReleaseAgeExclude` in `pnpm-workspace.yaml` until it is 7 days
-   old), remove `vendor/`, and put back plugin-github's
-   `npm install --omit=dev --omit=peer --install-strategy=nested
-   --ignore-scripts /tmp/plugin.tgz` line in `e2e/Dockerfile`.
-2. **QAuth's released images.** The end-to-end suite runs the server and
-   migration-runner images `e2e/qauth-images.sh` builds from the qauth
-   commit `e2e/qauth-commit` names, until a QAuth release carries
-   qauth-labs/qauth#671. Pin that release's images by digest in
-   `e2e/Dockerfile` and `e2e/compose.yml`, as plugin-github does, and remove
-   `e2e/qauth-images.sh`, `e2e/qauth-commit` and the CI step that runs it.
-
 ## Cut a release
 
 1. In a pull request, set `version` in `package.json` (for example
-   `0.1.0-rc.0`, the first) and move the `Unreleased` entries of
-   `CHANGELOG.md` under `## [0.1.0-rc.0]`, update the links at the bottom and
-   the README's compatibility table. Merge it when CI is green.
+   `0.1.0-rc.1`) and move the `Unreleased` entries of `CHANGELOG.md` under
+   `## [0.1.0-rc.1]`, update the links at the bottom and the README's
+   compatibility table. Merge it when CI is green.
 
 2. Tag the merge commit on `main` and push the tag:
 
    ```sh
-   git tag -s v0.1.0-rc.0 -m v0.1.0-rc.0
-   git push origin v0.1.0-rc.0
+   git tag -s v0.1.0-rc.1 -m v0.1.0-rc.1
+   git push origin v0.1.0-rc.1
    ```
 
 3. `release.yml` runs the whole CI again (checks, preset kit, end-to-end

@@ -5,14 +5,6 @@
 > this package may change before QAuth 1.0. Do not rely on it for production
 > sign-in yet.
 
-> **Not released yet.** The plugin is written against the upstream OpenID
-> Connect preset shape of the plugin SDK (qauth-labs/qauth#671), which no
-> QAuth release carries yet. Until one does, it builds against a vendored
-> copy of that SDK (`vendor/`), and its end-to-end suite runs a QAuth server
-> image built from the qauth commit `e2e/qauth-commit` names. Both are
-> temporary: the first release candidate moves to the SDK on npm and to
-> QAuth's released images.
-
 Sign-in with Google for [QAuth](https://github.com/qauth-labs/qauth), as an
 upstream OpenID Connect preset. A realm that enables it offers "Google" as an
 upstream sign-in: the person signs in with their Google account, and QAuth
@@ -26,14 +18,15 @@ does discovery, PKCE, `state` and `nonce`, the token request and the ID token
 checks. A fix there reaches this plugin with a QAuth release.
 
 The plugin is made and released by the QAuth project, in its own repository,
-the way a third party writes a plugin: it depends only on the plugin SDK,
-`@qauth-labs/plugin-sdk`, and has its own version line.
+the way a third party writes a plugin: it depends only on the published
+[`@qauth-labs/plugin-sdk`](https://www.npmjs.com/package/@qauth-labs/plugin-sdk)
+and has its own version line.
 
 ## Compatibility
 
-| Plugin                    | QAuth server                                        | AuthMethod contract        | Plugin SDK                                                               |
-| ------------------------- | --------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------ |
-| `0.1.0-rc.0` (unreleased) | the first release that carries qauth-labs/qauth#671 | `qauth-auth-method/1-rc.0` | the release that carries qauth-labs/qauth#671 (vendored until it is out) |
+| Plugin       | QAuth server               | AuthMethod contract        | Plugin SDK |
+| ------------ | -------------------------- | -------------------------- | ---------- |
+| `0.1.0-rc.0` | `0.2.3` and later on `0.2` | `qauth-auth-method/1-rc.0` | `0.2.3`    |
 
 ## What it sets
 
@@ -111,8 +104,8 @@ allowlist entry does not open a private address for a preset's calls.
 
 ## Install it (operators)
 
-You need a QAuth release that carries the preset loader (qauth-labs/qauth#671),
-and an image you build on top of QAuth's released one.
+You need QAuth `0.2.3` or later, and an image you build on top of QAuth's
+released one.
 
 ### 1. Register the client at Google
 
@@ -141,13 +134,13 @@ your build context, without installing anything:
 mkdir plugins && cd plugins
 npm init --yes > /dev/null
 npm install --package-lock-only --save-exact --omit=dev --omit=peer \
-  --install-strategy=nested --ignore-scripts @qauth-labs/plugin-google@<version>
+  --install-strategy=nested --ignore-scripts @qauth-labs/plugin-google@0.1.0-rc.0
 ```
 
 Read `package-lock.json` and commit both files. Then:
 
 ```dockerfile
-ARG QAUTH_IMAGE=ghcr.io/qauth-labs/qauth/auth-server:<version>@sha256:<digest>
+ARG QAUTH_IMAGE=ghcr.io/qauth-labs/qauth/auth-server:0.2.3@sha256:<digest>
 
 # The build stage writes the files the server will run: pin it by digest too.
 FROM node:26-alpine@sha256:<digest> AS plugin
@@ -232,18 +225,16 @@ client config, the attribute rules, and Google's own discovery document
 against the plugin's origins. The sign-in itself runs on QAuth's client, so
 it is the end-to-end suite's.
 
-The end-to-end suite needs docker, git, openssl, Node and pnpm:
+The end-to-end suite needs docker, openssl, Node and pnpm:
 
 ```sh
 pnpm run e2e
 ```
 
-It first builds QAuth's server and migration-runner images from the qauth
-commit `e2e/qauth-commit` names, unless they are there already, which takes
-a while. Then it packs the plugin, adds it to the server image as above, and
-starts it with PostgreSQL, Redis and a mock Google at Google's own host
-names. It configures the plugin through the admin API and signs in through
-the server's pages. It checks that:
+It packs the plugin, builds QAuth's released server image with the plugin
+added as above, starts it with PostgreSQL, Redis and a mock Google at
+Google's own host names, configures the plugin through the admin API and
+signs in through the server's pages. It checks that:
 
 - the boot loads the plugin with `PLUGIN_API_ENABLED` on, and skips it,
   saying why, with it off;

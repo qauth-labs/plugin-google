@@ -10,13 +10,7 @@
   "categories": {
     "correctness": "off"
   },
-  "ignorePatterns": [
-    "**/coverage/**",
-    "**/dist/**",
-    "**/node_modules/**",
-    "e2e/.work/**",
-    "e2e/.work-qauth/**"
-  ],
+  "ignorePatterns": ["**/coverage/**", "**/dist/**", "**/node_modules/**", "e2e/.work/**"],
   "rules": {
     "for-direction": "error",
     "no-async-promise-executor": "error",

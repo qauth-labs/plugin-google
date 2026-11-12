@@ -1,18 +1,11 @@
 #!/usr/bin/env bash
-# The end-to-end suite: QAuth's server image with this plugin installed the
-# way an operator installs it, against a mock Google at Google's own host
-# names, driven over HTTP by e2e/google.e2e.test.ts.
+# The end-to-end suite: QAuth's released server image with this plugin
+# installed the way an operator installs it, against a mock Google at
+# Google's own host names, driven over HTTP by e2e/google.e2e.test.ts.
 #
-# Needs docker (with compose), git, openssl, node and pnpm. Run it from
-# anywhere:
+# Needs docker (with compose), openssl, node and pnpm. Run it from anywhere:
 #
 #   pnpm run e2e
-#
-# QAUTH_IMAGE and QAUTH_MIGRATION_IMAGE name QAuth's auth-server and
-# migration-runner images. Until a QAuth release carries the preset loader
-# (qauth-labs/qauth#671), they default to the images e2e/qauth-images.sh
-# builds from the commit e2e/qauth-commit names, and the script builds them
-# first when it uses a default.
 #
 # It packs the plugin as npm would publish it, makes throwaway secrets and a
 # throwaway CA in e2e/.work/, builds the image (e2e/Dockerfile), starts the
@@ -25,28 +18,12 @@ root="$(dirname "$here")"
 work="$here/.work"
 compose=(docker compose --file "$here/compose.yml")
 
-commit="$(tr -d '[:space:]' < "$here/qauth-commit")"
-if [ -z "${QAUTH_IMAGE:-}" ] || [ -z "${QAUTH_MIGRATION_IMAGE:-}" ]; then
-  bash "$here/qauth-images.sh"
-fi
-QAUTH_IMAGE="${QAUTH_IMAGE:-qauth-e2e/auth-server:$commit}"
-QAUTH_MIGRATION_IMAGE="${QAUTH_MIGRATION_IMAGE:-qauth-e2e/migration-runner:$commit}"
-export QAUTH_IMAGE QAUTH_MIGRATION_IMAGE
-
 rm -rf "$work"
 mkdir -p "$work/certs" "$work/ca" "$work/keys" "$work/pack"
 
-# The plugin as npm would receive it, and the plugin SDK it depends on for
-# now, the vendored tarball (vendor/README.md), which e2e/Dockerfile nests
-# under it.
+# The plugin as npm would receive it.
 (cd "$root" && pnpm run build > /dev/null && pnpm pack --pack-destination "$work/pack" > /dev/null)
 cp "$work"/pack/*.tgz "$work/plugin.tgz"
-sdk=("$root"/vendor/qauth-labs-plugin-sdk-*.tgz)
-if [ "${#sdk[@]}" -ne 1 ] || [ ! -f "${sdk[0]}" ]; then
-  echo "vendor/ must hold exactly one qauth-labs-plugin-sdk tarball" >&2
-  exit 1
-fi
-cp "${sdk[0]}" "$work/plugin-sdk.tgz"
 
 # The host names the mock answers at: the hosts of the preset's own origins.
 hosts="$(cd "$root" && node --input-type=module --eval '

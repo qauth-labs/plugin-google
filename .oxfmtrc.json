@@ -13,14 +13,5 @@
   // The order of imports, checked by `oxfmt --check` and fixed by `oxfmt`.
   "sortImports": true,
   // Gitignore-style; .gitignore applies too.
-  "ignorePatterns": [
-    "node_modules",
-    "dist",
-    "coverage",
-    "*.log",
-    "pnpm-lock.yaml",
-    "e2e/.work",
-    "e2e/.work-qauth",
-    "vendor/*.tgz"
-  ]
+  "ignorePatterns": ["node_modules", "dist", "coverage", "*.log", "pnpm-lock.yaml", "e2e/.work"]
 }

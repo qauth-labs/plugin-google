@@ -16,8 +16,5 @@
     "skipLibCheck": false,
     "noEmit": true
   },
-  "include": ["src", "test", "e2e", "*.ts"],
-  // The end-to-end suite's generated files and the qauth checkout it builds
-  // the server images from.
-  "exclude": ["node_modules", "dist", "e2e/.work", "e2e/.work-qauth"]
+  "include": ["src", "test", "e2e", "*.ts"]
 }

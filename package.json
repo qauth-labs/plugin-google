@@ -52,7 +52,7 @@
     "prepack": "pnpm run build"
   },
   "dependencies": {
-    "@qauth-labs/plugin-sdk": "file:vendor/qauth-labs-plugin-sdk-0.2.2.tgz"
+    "@qauth-labs/plugin-sdk": "0.2.3"
   },
   "peerDependencies": {
     "zod": "^4.6.7"

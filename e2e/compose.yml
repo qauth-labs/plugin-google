@@ -1,6 +1,6 @@
-# The end-to-end suite's deployment (run.sh starts it): QAuth's server image
-# with this plugin added (Dockerfile), its migration runner, PostgreSQL,
-# Redis, and a mock Google.
+# The end-to-end suite's deployment (run.sh starts it): QAuth's released
+# images, the server with this plugin added (Dockerfile) and its migration
+# runner, with PostgreSQL, Redis and a mock Google.
 #
 # The mock answers at Google's own host names, the hosts of the preset's
 # origins, as network aliases: the server's egress client resolves names
@@ -13,7 +13,6 @@
 # route to it while the deployment runs. The allowlist (egress-allowlist.json)
 # names Google's hosts all the same; it is not what lets the calls through.
 #
-# QAUTH_IMAGE and QAUTH_MIGRATION_IMAGE are QAuth's images; run.sh sets them.
 # The secrets (JWT keys, KEK, session cookie secret, the mock's client secret)
 # come from run.sh's environment, made fresh for each run.
 name: plugin-google-e2e
@@ -29,8 +28,6 @@ x-server: &server
   build:
     context: .
     dockerfile: Dockerfile
-    args:
-      QAUTH_IMAGE: ${QAUTH_IMAGE:?run e2e/run.sh}
   image: plugin-google-e2e/auth-server:local
   environment: &server-env
     NODE_ENV: production
@@ -100,7 +97,7 @@ services:
       retries: 30
 
   migrate:
-    image: ${QAUTH_MIGRATION_IMAGE:?run e2e/run.sh}
+    image: ghcr.io/qauth-labs/qauth/migration-runner:0.2.3@sha256:0cb5fdaf25ddf8b5cf8813fda9bdfa29c4c0fea2cb6809082b3583f33ffdc585
     environment:
       DATABASE_URL: postgres://qauth:qauth@postgres:5432/qauth
     depends_on:
