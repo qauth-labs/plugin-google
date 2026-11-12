@@ -83,12 +83,39 @@ export const googleConfigSchema = z.strictObject({
 /** The plugin's config, parsed. */
 export type GoogleConfig = z.output<typeof googleConfigSchema>;
 
+/** An own string member of the claims, or `undefined`. */
+function ownString(claims: Readonly<Record<string, unknown>>, name: string): string | undefined {
+  const value = Object.hasOwn(claims, name) ? claims[name] : undefined;
+  return typeof value === 'string' ? value : undefined;
+}
+
+/**
+ * Whether Google vouches for the ID token's `email`: `email_verified` is the
+ * boolean `true`, and Google hosts the address, so it is authoritative for
+ * it. That is a Gmail address, or a Google Workspace account, whose ID token
+ * carries a non-empty `hd`. For any other address, `email_verified` says only
+ * that the address was verified when the Google account was made, and its
+ * owner may have changed since, as Google's own sign-in guidance says. Such an
+ * address is kept unverified.
+ *
+ * `hd` need not be the address's domain: a Workspace account may use a
+ * secondary domain of its organisation. A string, a number or an absent
+ * `email_verified` leaves the email unverified, and so does a flag or an
+ * `hd` that is not an own member of the claims.
+ */
+export function googleVouchesForEmail(claims: Readonly<Record<string, unknown>>): boolean {
+  if (!upstreamClaimIsTrue(claims, 'email_verified')) return false;
+  const hd = ownString(claims, 'hd');
+  if (hd !== undefined && hd !== '') return true;
+  const email = ownString(claims, 'email');
+  return email !== undefined && email.toLowerCase().endsWith('@gmail.com');
+}
+
 /**
  * The attributes a Google sign-in maps to, under the source `google`.
  *
- * - `email` is verified only when the ID token's `email_verified` is the
- *   boolean `true`: a string, a number or an absent flag leaves it
- *   unverified.
+ * - `email` is verified only when Google vouches for it
+ *   ({@link googleVouchesForEmail}).
  * - `name`, `given_name`, `family_name` and `locale` are never verified.
  * - `hd`, the Google Workspace domain of the account, is kept as an
  *   attribute that is never verified. It says which domain the account
@@ -97,11 +124,7 @@ export type GoogleConfig = z.output<typeof googleConfigSchema>;
  * Any other claim, such as `picture`, is not kept.
  */
 export const GOOGLE_ATTRIBUTES: readonly UpstreamClaimAttribute[] = Object.freeze([
-  Object.freeze({
-    claim: 'email',
-    verified: (claims: Readonly<Record<string, unknown>>) =>
-      upstreamClaimIsTrue(claims, 'email_verified'),
-  }),
+  Object.freeze({ claim: 'email', verified: googleVouchesForEmail }),
   Object.freeze({ claim: 'name' }),
   Object.freeze({ claim: 'given_name' }),
   Object.freeze({ claim: 'family_name' }),

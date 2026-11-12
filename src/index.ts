@@ -24,6 +24,7 @@ export {
   googleConfigSchema,
   googleRedirectUri,
   googleUpstreamConfig,
+  googleVouchesForEmail,
   MAX_GOOGLE_CLIENT_ID_LENGTH,
   MAX_GOOGLE_CLIENT_SECRET_LENGTH,
   upstreamOidcPreset,

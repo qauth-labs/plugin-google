@@ -28,7 +28,8 @@ The first version, not released yet. Experimental: QAuth loads it only with
 - A realm's admin sets the client id and the client secret, which the config
   schema marks write-only, and nothing else.
 - The account is Google's `sub`. The email is a verified attribute only when
-  `email_verified` is the boolean `true`; `name`, `given_name`,
+  `email_verified` is the boolean `true` and Google hosts the address (a
+  Gmail address, or a Workspace account with `hd`); `name`, `given_name`,
   `family_name`, `locale` and `hd` are unverified attributes, and `hd`
   restricts nothing. The sign-in pages show the name Google and no logo.
 - CI with the plugin SDK's preset kit, and an end-to-end suite that runs

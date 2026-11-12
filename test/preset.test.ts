@@ -33,6 +33,7 @@ const {
   googleConfigSchema,
   googleRedirectUri,
   googleUpstreamConfig,
+  googleVouchesForEmail,
   upstreamOidcPreset,
 } = plugin;
 
@@ -283,6 +284,37 @@ describe('the attribute rules', () => {
     expect(mapped(GOOGLE_ATTRIBUTES, claims)).toEqual([
       { key: 'email', value: 'bob@example.com', verified: false },
     ]);
+  });
+
+  it.each([
+    ['a Gmail address', 'ada@gmail.com'],
+    ['a Gmail address in another case', 'Ada@GMail.com'],
+  ])('map the email as verified for %s, without hd', (_case, email) => {
+    expect(mapped(GOOGLE_ATTRIBUTES, { sub: 'user-3', email, email_verified: true })).toEqual([
+      { key: 'email', value: email, verified: true },
+    ]);
+  });
+
+  it.each([
+    ['an address Google does not host, without hd', { email: 'bob@example.com' }],
+    ['an empty hd', { email: 'bob@example.com', hd: '' }],
+    ['an hd that is not a string', { email: 'bob@example.com', hd: 1 }],
+    ['a domain that only contains gmail.com', { email: 'bob@notgmail.com' }],
+    ['gmail.com as a subdomain', { email: 'bob@gmail.com.example.com' }],
+  ])('keep the email unverified for %s, even when email_verified is true', (_case, claims) => {
+    const value = claims.email;
+    expect(
+      mapped(GOOGLE_ATTRIBUTES, { sub: 'user-4', email_verified: true, ...claims }).filter(
+        (attribute) => attribute.key === 'email',
+      ),
+    ).toEqual([{ key: 'email', value, verified: false }]);
+  });
+
+  it('read hd only as an own member of the claims', () => {
+    const inherited = Object.create({ hd: 'example.com' }) as Record<string, unknown>;
+    inherited['email'] = 'eve@example.com';
+    inherited['email_verified'] = true;
+    expect(googleVouchesForEmail(inherited)).toBe(false);
   });
 
   it('read email_verified only as an own member of the claims', () => {

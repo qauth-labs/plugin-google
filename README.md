@@ -79,15 +79,19 @@ address signs in the same account.
 
 | Attribute     | From the claim | Verified                                         |
 | ------------- | -------------- | ------------------------------------------------ |
-| `email`       | `email`        | only when `email_verified` is the boolean `true` |
+| `email`       | `email`        | only when Google vouches for it (below)          |
 | `name`        | `name`         | never                                            |
 | `given_name`  | `given_name`   | never                                            |
 | `family_name` | `family_name`  | never                                            |
 | `locale`      | `locale`       | never                                            |
 | `hd`          | `hd`           | never                                            |
 
-`email_verified` as a string, a number or absent leaves the email
-unverified. No other claim is kept, `picture` among them. A method built from
+Google vouches for the email when `email_verified` is the boolean `true` and
+Google hosts the address: a Gmail address, or a Google Workspace account,
+whose ID token carries `hd`. For any other address, `email_verified` only says
+that the address was verified when the Google account was made, and its owner
+may have changed since, so the plugin keeps it unverified. `email_verified` as
+a string, a number or absent leaves the email unverified. No other claim is kept, `picture` among them. A method built from
 a preset ranks its verified attributes with QAuth's `oidc_*` providers in
 claim resolution, so a verified Google email is the one an application's ID
 token carries when the scope `email` was granted.
