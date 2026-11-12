@@ -305,8 +305,8 @@ describe('the attribute rules', () => {
     const value = claims.email;
     expect(
       mapped(GOOGLE_ATTRIBUTES, { sub: 'user-4', email_verified: true, ...claims }).filter(
-        (attribute) => attribute.key === 'email',
-      ),
+        (attribute) => attribute.key === 'email'
+      )
     ).toEqual([{ key: 'email', value, verified: false }]);
   });
 

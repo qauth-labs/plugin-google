@@ -77,14 +77,14 @@ address signs in the same account.
 **Attributes.** When the account is created, QAuth stores, under the source
 `google`:
 
-| Attribute     | From the claim | Verified                                         |
-| ------------- | -------------- | ------------------------------------------------ |
-| `email`       | `email`        | only when Google vouches for it (below)          |
-| `name`        | `name`         | never                                            |
-| `given_name`  | `given_name`   | never                                            |
-| `family_name` | `family_name`  | never                                            |
-| `locale`      | `locale`       | never                                            |
-| `hd`          | `hd`           | never                                            |
+| Attribute     | From the claim | Verified                                |
+| ------------- | -------------- | --------------------------------------- |
+| `email`       | `email`        | only when Google vouches for it (below) |
+| `name`        | `name`         | never                                   |
+| `given_name`  | `given_name`   | never                                   |
+| `family_name` | `family_name`  | never                                   |
+| `locale`      | `locale`       | never                                   |
+| `hd`          | `hd`           | never                                   |
 
 Google vouches for the email when `email_verified` is the boolean `true` and
 Google hosts the address: a Gmail address, or a Google Workspace account,
