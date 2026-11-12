@@ -1,6 +1,6 @@
 {
   "name": "@qauth-labs/plugin-google",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.0",
   "description": "Google sign-in for QAuth, as an upstream OpenID Connect preset: Google's issuer, origins, scopes and claim rules, run by QAuth's own OpenID Connect client. Experimental.",
   "keywords": [
     "qauth",

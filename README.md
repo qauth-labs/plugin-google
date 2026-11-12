@@ -26,6 +26,7 @@ and has its own version line.
 
 | Plugin       | QAuth server               | AuthMethod contract        | Plugin SDK |
 | ------------ | -------------------------- | -------------------------- | ---------- |
+| `0.1.0`      | `0.2.3` and later on `0.2` | `qauth-auth-method/1-rc.0` | `0.2.3`    |
 | `0.1.0-rc.0` | `0.2.3` and later on `0.2` | `qauth-auth-method/1-rc.0` | `0.2.3`    |
 
 ## What it sets
@@ -134,7 +135,7 @@ your build context, without installing anything:
 mkdir plugins && cd plugins
 npm init --yes > /dev/null
 npm install --package-lock-only --save-exact --omit=dev --omit=peer \
-  --install-strategy=nested --ignore-scripts @qauth-labs/plugin-google@0.1.0-rc.0
+  --install-strategy=nested --ignore-scripts @qauth-labs/plugin-google@0.1.0
 ```
 
 Read `package-lock.json` and commit both files. Then:
